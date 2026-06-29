@@ -12,7 +12,7 @@ function AdminDashboard({ onLogout }) {
 
   const fetchCampaigns = async () => {
     try {
-      const res = await fetch('http://localhost:5001/api/campaigns');
+      const res = await fetch('${process.env.REACT_APP_API_URL}/api/campaigns');
       const data = await res.json();
       if (data.success) setCampaigns(data.campaigns);
     } catch (error) {
@@ -24,7 +24,7 @@ function AdminDashboard({ onLogout }) {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:5001/api/campaigns', {
+      const res = await fetch('${process.env.REACT_APP_API_URL}/api/campaigns', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newCampaign)
@@ -43,7 +43,7 @@ function AdminDashboard({ onLogout }) {
   const deleteCampaign = async (id) => {
     if (!window.confirm('Delete this campaign?')) return;
     try {
-      await fetch(`http://localhost:5001/api/campaigns/${id}`, { method: 'DELETE' });
+      await fetch(`${process.env.REACT_APP_API_URL}/api/campaigns/${id}`, { method: 'DELETE' });
       fetchCampaigns();
     } catch (error) {
       console.error('Error deleting campaign:', error);
@@ -67,7 +67,7 @@ function AdminDashboard({ onLogout }) {
   const updateCampaign = async (id) => {
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:5001/api/campaigns/${id}`, {
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/api/campaigns/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editData)
