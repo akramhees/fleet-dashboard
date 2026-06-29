@@ -140,7 +140,7 @@ function Dashboard({ user, onLogout }) {
         </div>
 
         {/* Google Map */}
-        <LoadScript googleMapsApiKey="AIzaSyBb9N7JtOi-CyjCsD3Z82oYf6_PPYWKri0">
+        <LoadScript googleMapsApiKey="<<api key>>">
           <GoogleMap
             mapContainerStyle={mapContainerStyle}
             center={mapCenter}
