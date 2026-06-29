@@ -194,7 +194,7 @@ function Dashboard({ user, onLogout }) {
       </div>
 
       <div className="card" style={{ padding: '8px', minHeight: '420px' }}>
-        <LoadScript googleMapsApiKey="AIzaSyBb9N7JtOi-CyjCsD3Z82oYf6_PPYWKri0">
+        <LoadScript googleMapsApiKey="API_KEY_HERE">
           <GoogleMap
             mapContainerStyle={mapContainerStyle}
             center={mapCenter}
