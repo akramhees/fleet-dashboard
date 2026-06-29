@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
+import { FaCar, FaPlay, FaStop, FaSyncAlt } from 'react-icons/fa';
 import localforage from 'localforage';
 import './colors.css';
 import './App.css';
@@ -12,30 +13,10 @@ const mapContainerStyle = {
 
 const mapOptions = {
   styles: [
-    {
-      featureType: 'all',
-      elementType: 'all',
-      stylers: [
-        { saturation: -100 },
-        { lightness: -20 },
-        { gamma: 0.5 }
-      ]
-    },
-    {
-      featureType: 'road',
-      elementType: 'geometry',
-      stylers: [{ color: '#3a3a4a' }]
-    },
-    {
-      featureType: 'water',
-      elementType: 'geometry',
-      stylers: [{ color: '#1a1a2e' }]
-    },
-    {
-      featureType: 'landscape',
-      elementType: 'geometry',
-      stylers: [{ color: '#28293e' }]
-    }
+    { featureType: 'all', elementType: 'all', stylers: [{ saturation: -100 }, { lightness: -20 }, { gamma: 0.5 }] },
+    { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#3a3a4a' }] },
+    { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#1a1a2e' }] },
+    { featureType: 'landscape', elementType: 'geometry', stylers: [{ color: '#28293e' }] }
   ]
 };
 
@@ -61,9 +42,7 @@ function Dashboard({ user, onLogout }) {
   }, []);
 
   useEffect(() => {
-    if (isOnline && offlineLocations.length > 0) {
-      syncOfflineLocations();
-    }
+    if (isOnline && offlineLocations.length > 0) syncOfflineLocations();
   }, [isOnline]);
 
   const syncOfflineLocations = async () => {
@@ -95,7 +74,7 @@ function Dashboard({ user, onLogout }) {
           body: JSON.stringify(locationData)
         });
         return true;
-      } catch (error) {
+      } catch {
         return false;
       }
     }
@@ -113,22 +92,17 @@ function Dashboard({ user, onLogout }) {
           setLocation(newLocation);
           setMapCenter(newLocation);
 
-          const locationData = {
-            driver_id: user.id,
-            lat: newLocation.lat,
-            lng: newLocation.lng
-          };
-
+          const locationData = { driver_id: user.id, lat: newLocation.lat, lng: newLocation.lng };
           const saved = await saveLocation(locationData);
-          
+
           if (!saved) {
             const existing = await localforage.getItem('offlineLocations') || [];
             existing.push(locationData);
             await localforage.setItem('offlineLocations', existing);
             setOfflineLocations(existing);
-            setStatus('Offline - Location saved locally');
+            setStatus('Offline – saved locally');
           } else {
-            setStatus('Driving - Location tracking active');
+            setStatus('Driving – location active');
           }
         },
         (error) => setStatus('Error: ' + error.message)
@@ -148,16 +122,20 @@ function Dashboard({ user, onLogout }) {
   return (
     <div className="dashboard-container">
       <div className="header-modern">
-        <h1>FleetPulse <span>Driver</span></h1>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-          <span style={{ fontSize: '14px', opacity: 0.8 }}>{user?.name}</span>
+        <h1><FaCar style={{ marginRight: '10px', color: '#8a5c66' }} size={20} /> FleetMate <span>Driver</span></h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <span style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>{user?.name}</span>
           <span style={{
             fontSize: '12px',
             padding: '4px 12px',
             borderRadius: '20px',
-            background: isOnline ? 'rgba(40, 167, 69, 0.2)' : 'rgba(220, 53, 69, 0.2)',
-            color: isOnline ? '#5cb85c' : '#dc3545'
+            background: isOnline ? 'rgba(40, 167, 69, 0.12)' : 'rgba(220, 53, 69, 0.12)',
+            color: isOnline ? '#5cb85c' : '#e06b6b',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px'
           }}>
+            <span className={`status-dot ${isOnline ? 'online' : 'offline'}`}></span>
             {isOnline ? 'Online' : 'Offline'}
           </span>
           <button onClick={onLogout} className="btn-danger" style={{ padding: '8px 20px', fontSize: '14px' }}>
@@ -169,32 +147,34 @@ function Dashboard({ user, onLogout }) {
       <div className="card" style={{ marginBottom: '24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' }}>
           <div>
-            <h2 style={{ marginBottom: '4px' }}>Driver Dashboard</h2>
-            <p style={{ color: '#9a8ea6' }}>Status: <strong style={{ color: '#e8e7ed' }}>{status}</strong></p>
+            <h2 style={{ fontSize: '20px', fontWeight: 600, marginBottom: '2px' }}>Driver Dashboard</h2>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
+              Status: <strong style={{ color: 'var(--text-primary)' }}>{status}</strong>
+            </p>
             {offlineLocations.length > 0 && (
-              <p style={{ color: '#f0ad4e', fontSize: '13px' }}>
-                {offlineLocations.length} locations waiting to sync
+              <p style={{ color: '#f0ad4e', fontSize: '13px', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <FaSyncAlt size={12} /> {offlineLocations.length} locations waiting to sync
               </p>
             )}
             {location && (
-              <p style={{ fontSize: '13px', color: '#6a5e74', marginTop: '4px' }}>
-                Location: {location.lat.toFixed(6)}, {location.lng.toFixed(6)}
+              <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                {location.lat.toFixed(6)}, {location.lng.toFixed(6)}
               </p>
             )}
           </div>
-          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-            <button onClick={startTracking} disabled={isDriving} className="btn-primary">
-              Start Shift
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '8px' }}>
+            <button onClick={startTracking} disabled={isDriving} className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <FaPlay size={14} /> Start Shift
             </button>
-            <button onClick={stopTracking} disabled={!isDriving} className="btn-danger">
-              End Shift
+            <button onClick={stopTracking} disabled={!isDriving} className="btn-danger" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <FaStop size={14} /> End Shift
             </button>
           </div>
         </div>
       </div>
 
-      <div className="card" style={{ padding: '8px', minHeight: '420px' }}>
-        <LoadScript googleMapsApiKey="AIzaSyBb9N7JtOi-CyjCsD3Z82oYf6_PPYWKri0">
+      <div className="card" style={{ padding: '8px' }}>
+        <LoadScript googleMapsApiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY}>
           <GoogleMap
             mapContainerStyle={mapContainerStyle}
             center={mapCenter}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { FaChartBar, FaUsers, FaBullhorn, FaTrash, FaPlus } from 'react-icons/fa';
 import './colors.css';
 import './App.css';
 
@@ -58,14 +59,16 @@ function AdminDashboard({ onLogout }) {
   return (
     <div className="dashboard-container">
       <div className="header-modern">
-        <h1>FleetPulse <span>Admin</span></h1>
+        <h1><FaChartBar style={{ marginRight: '10px', color: '#8a5c66' }} size={20} /> FleetMate <span>Admin</span></h1>
         <button onClick={onLogout} className="btn-danger" style={{ padding: '8px 20px', fontSize: '14px' }}>
           Logout
         </button>
       </div>
 
       <div className="card" style={{ marginBottom: '24px' }}>
-        <h3 style={{ marginBottom: '16px', color: '#d4d2e0' }}>Active Drivers</h3>
+        <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '16px', color: 'var(--text-secondary)' }}>
+          <FaUsers style={{ marginRight: '8px' }} /> Active Drivers
+        </h3>
         <table className="table-modern">
           <thead><tr><th>Name</th><th>Status</th><th>Location</th></tr></thead>
           <tbody>
@@ -81,8 +84,10 @@ function AdminDashboard({ onLogout }) {
       </div>
 
       <div className="card">
-        <h3 style={{ marginBottom: '16px', color: '#d4d2e0' }}>Marketing Campaigns</h3>
-        
+        <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '16px', color: 'var(--text-secondary)' }}>
+          <FaBullhorn style={{ marginRight: '8px' }} /> Marketing Campaigns
+        </h3>
+
         <form onSubmit={createCampaign} className="form-row">
           <input
             type="text" placeholder="Campaign Name"
@@ -92,7 +97,8 @@ function AdminDashboard({ onLogout }) {
             required
           />
           <select
-            className="input-modern select"
+            className="input-modern"
+            style={{ width: 'auto', minWidth: '120px' }}
             value={newCampaign.status}
             onChange={(e) => setNewCampaign({...newCampaign, status: e.target.value})}
           >
@@ -100,14 +106,15 @@ function AdminDashboard({ onLogout }) {
             <option value="Paused">Paused</option>
           </select>
           <input
-            type="text" placeholder="Budget (e.g. $1000)"
+            type="text" placeholder="Budget"
             className="input-modern"
+            style={{ width: 'auto', minWidth: '120px' }}
             value={newCampaign.budget}
             onChange={(e) => setNewCampaign({...newCampaign, budget: e.target.value})}
             required
           />
-          <button type="submit" className="btn-primary" disabled={loading}>
-            {loading ? 'Creating...' : 'Add Campaign'}
+          <button type="submit" className="btn-primary" disabled={loading} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <FaPlus size={14} /> {loading ? 'Creating...' : 'Add Campaign'}
           </button>
         </form>
 
@@ -116,12 +123,12 @@ function AdminDashboard({ onLogout }) {
           <tbody>
             {campaigns.map(c => (
               <tr key={c.id}>
-                <td><strong style={{ color: '#e8e7ed' }}>{c.name}</strong></td>
+                <td style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{c.name}</td>
                 <td><span className={c.status === 'Active' ? 'badge badge-active' : 'badge badge-paused'}>{c.status}</span></td>
                 <td>{c.budget}</td>
                 <td>
-                  <button onClick={() => deleteCampaign(c.id)} className="btn-danger" style={{ padding: '4px 16px', fontSize: '13px' }}>
-                    Delete
+                  <button onClick={() => deleteCampaign(c.id)} className="btn-danger" style={{ padding: '4px 16px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <FaTrash size={12} /> Delete
                   </button>
                 </td>
               </tr>

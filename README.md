@@ -1,4 +1,4 @@
-FleetPulse - Driver Tracking Platform
+FleetMate - Driver Tracking Platform
 
 Live Demo: https://fleetpulse-app.onrender.com
 
