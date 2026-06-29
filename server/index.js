@@ -17,9 +17,9 @@ const PORT = process.env.PORT || 5001;
 
 console.log('🔥 SERVER STARTING...');
 
-// Hardcoded database URL for Render
+// Corrected database URL
 const pool = new Pool({
-  connectionString: "postgresql://fleetpulse_db_zbds_user:P9gLHcN3JGAAbxpGJdBvjLJEZ9QSDSkq@dpg-d91322og4nts73c57etg-a/fleetpulse_db_zbds",
+  connectionString: "postgresql://fleetpulse_db_zbds_user:P9gLHcN3JGAAbxpGJdBvjLJEZ9QSDSkq@dpg-d91322og4nts73c57etg-a.oregon-postgres.render.com/fleetpulse_db_zbds",
   ssl: {
     rejectUnauthorized: false
   }
