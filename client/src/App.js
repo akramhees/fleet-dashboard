@@ -66,7 +66,7 @@ function App() {
         fontSize: '14px'
       }}>
         <p>
-          Built by <strong style={{ color: 'var(--text-secondary)' }}>Akram Hees</strong> &nbsp;|&nbsp;
+          Built by <strong style={{ color: 'var(--text-secondary)' }}>Akram</strong> &nbsp;|&nbsp;
           <a href="mailto:akramh2454@gmail.com" style={{ color: '#8a5c66', textDecoration: 'none' }}>
             akramh2454@gmail.com
           </a> &nbsp;|&nbsp;
