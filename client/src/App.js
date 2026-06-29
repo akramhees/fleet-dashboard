@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FaCar, FaChartBar } from 'react-icons/fa';
 import Login from './Login';
+import SignUp from './SignUp';
 import Dashboard from './Dashboard';
 import AdminDashboard from './AdminDashboard';
 import './colors.css';
@@ -9,11 +10,18 @@ import './App.css';
 function App() {
   const [user, setUser] = useState(null);
   const [role, setRole] = useState('driver');
+  const [showSignUp, setShowSignUp] = useState(false);
 
   const handleLogin = (userData) => setUser(userData);
   const handleLogout = () => { setUser(null); setRole('driver'); };
+  const handleSignUp = () => setShowSignUp(true);
+  const handleBackToLogin = () => setShowSignUp(false);
 
-  if (!user) return <Login onLogin={handleLogin} />;
+  if (showSignUp) {
+    return <SignUp onBackToLogin={handleBackToLogin} />;
+  }
+
+  if (!user) return <Login onLogin={handleLogin} onSignUp={handleSignUp} />;
 
   return (
     <div>
