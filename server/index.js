@@ -17,9 +17,9 @@ const PORT = process.env.PORT || 5001;
 
 console.log('🔥 SERVER STARTING...');
 
-// Corrected database URL
+
 const pool = new Pool({
-  connectionString: "postgresql://fleetpulse_db_zbds_user:P9gLHcN3JGAAbxpGJdBvjLJEZ9QSDSkq@dpg-d91322og4nts73c57etg-a.oregon-postgres.render.com/fleetpulse_db_zbds",
+  connectionString: "postgresql:
   ssl: {
     rejectUnauthorized: false
   }
@@ -28,7 +28,7 @@ const pool = new Pool({
 app.use(cors());
 app.use(express.json());
 
-// WebSocket connection
+
 io.on('connection', (socket) => {
   console.log('🔌 New client connected:', socket.id);
   socket.on('driver-location', (data) => {
@@ -40,7 +40,7 @@ io.on('connection', (socket) => {
   });
 });
 
-// Test database connection
+
 pool.connect((err, client, release) => {
   if (err) {
     console.log('❌ Database connection error:', err.message);
@@ -96,7 +96,7 @@ app.get('/api/test', (req, res) => {
   res.json({ message: 'Backend is working! 🚀' });
 });
 
-// Sign Up endpoint
+
 app.post('/api/signup', async (req, res) => {
   const { name, email, phone, password, licenseNumber, vehicleModel, vehiclePlate } = req.body;
   console.log('📝 Sign up attempt:', email);
@@ -240,5 +240,5 @@ app.delete('/api/campaigns/:id', async (req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log('✅ Server running on http://localhost:' + PORT);
+  console.log('✅ Server running on http:
 });
