@@ -8,7 +8,7 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: "*",
     methods: ["GET", "POST"]
   }
 });
@@ -17,12 +17,12 @@ const PORT = process.env.PORT || 5001;
 
 console.log('🔥 SERVER STARTING...');
 
+// Hardcoded database URL for Render
 const pool = new Pool({
-  user: 'akram',
-  host: 'localhost',
-  database: 'fleetpulse',
-  password: '',
-  port: 5432,
+  connectionString: "postgresql://fleetpulse_db_zbds_user:P9gLHcN3JGAAbxpGJdBvjLJEZ9QSDSkq@dpg-d91322og4nts73c57etg-a/fleetpulse_db_zbds",
+  ssl: {
+    rejectUnauthorized: false
+  }
 });
 
 app.use(cors());
@@ -31,18 +31,16 @@ app.use(express.json());
 // WebSocket connection
 io.on('connection', (socket) => {
   console.log('🔌 New client connected:', socket.id);
-
   socket.on('driver-location', (data) => {
     console.log('📍 Location update:', data);
     io.emit('location-update', data);
   });
-
   socket.on('disconnect', () => {
     console.log('🔌 Client disconnected:', socket.id);
   });
 });
 
-// Database connection test
+// Test database connection
 pool.connect((err, client, release) => {
   if (err) {
     console.log('❌ Database connection error:', err.message);
