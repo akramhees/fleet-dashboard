@@ -17,9 +17,8 @@ const PORT = process.env.PORT || 5001;
 
 console.log('🔥 SERVER STARTING...');
 
-
 const pool = new Pool({
-  connectionString: "postgresql:
+  connectionString: "postgresql://fleetpulse_db_zbds_user:P9gLHcN3JGAAbxpGJdBvjLJEZ9QSDSkq@dpg-d91322og4nts73c57etg-a.oregon-postgres.render.com/fleetpulse_db_zbds",
   ssl: {
     rejectUnauthorized: false
   }
@@ -27,7 +26,6 @@ const pool = new Pool({
 
 app.use(cors());
 app.use(express.json());
-
 
 io.on('connection', (socket) => {
   console.log('🔌 New client connected:', socket.id);
@@ -39,7 +37,6 @@ io.on('connection', (socket) => {
     console.log('🔌 Client disconnected:', socket.id);
   });
 });
-
 
 pool.connect((err, client, release) => {
   if (err) {
@@ -95,7 +92,6 @@ initDB();
 app.get('/api/test', (req, res) => {
   res.json({ message: 'Backend is working! 🚀' });
 });
-
 
 app.post('/api/signup', async (req, res) => {
   const { name, email, phone, password, licenseNumber, vehicleModel, vehiclePlate } = req.body;
@@ -240,5 +236,5 @@ app.delete('/api/campaigns/:id', async (req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log('✅ Server running on http:
+  console.log('✅ Server running on http://localhost:' + PORT);
 });
