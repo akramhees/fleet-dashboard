@@ -1,27 +1,53 @@
 import React, { useState } from 'react';
+import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
+
+const mapContainerStyle = {
+  width: '100%',
+  height: '400px'
+};
+
+const center = {
+  lat: 39.7392,
+  lng: -104.9903
+};
 
 function Dashboard({ user, onLogout }) {
   const [isDriving, setIsDriving] = useState(false);
   const [location, setLocation] = useState(null);
   const [status, setStatus] = useState('Not started');
+  const [mapCenter, setMapCenter] = useState(center);
 
-  // Get user's location
   const startTracking = () => {
     if (navigator.geolocation) {
       navigator.geolocation.watchPosition(
-        (position) => {
-          setLocation({
+        async (position) => {
+          const newLocation = {
             lat: position.coords.latitude,
             lng: position.coords.longitude
-          });
-          setStatus('📍 Tracking location...');
+          };
+          setLocation(newLocation);
+          setMapCenter(newLocation);
+          setStatus('✅ Driving - Location tracking active');
+          
+          try {
+            await fetch('http://localhost:5001/api/location', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                driver_id: user.id,
+                lat: newLocation.lat,
+                lng: newLocation.lng
+              })
+            });
+          } catch (error) {
+            console.error('Error saving location:', error);
+          }
         },
         (error) => {
           setStatus('❌ Error getting location: ' + error.message);
         }
       );
       setIsDriving(true);
-      setStatus('✅ Driving - Location tracking active');
     } else {
       setStatus('❌ Geolocation not supported');
     }
@@ -34,7 +60,7 @@ function Dashboard({ user, onLogout }) {
   };
 
   return (
-    <div style={{ maxWidth: '600px', margin: '50px auto', padding: '20px' }}>
+    <div style={{ maxWidth: '800px', margin: '50px auto', padding: '20px' }}>
       <div style={{ 
         display: 'flex', 
         justifyContent: 'space-between', 
@@ -77,7 +103,7 @@ function Dashboard({ user, onLogout }) {
           )}
         </div>
 
-        <div style={{ display: 'flex', gap: '10px' }}>
+        <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
           <button 
             onClick={startTracking}
             disabled={isDriving}
@@ -112,6 +138,17 @@ function Dashboard({ user, onLogout }) {
             🔴 End Shift
           </button>
         </div>
+
+        {/* Google Map */}
+        <LoadScript googleMapsApiKey="AIzaSyBb9N7JtOi-CyjCsD3Z82oYf6_PPYWKri0">
+          <GoogleMap
+            mapContainerStyle={mapContainerStyle}
+            center={mapCenter}
+            zoom={14}
+          >
+            {location && <Marker position={location} />}
+          </GoogleMap>
+        </LoadScript>
       </div>
     </div>
   );
