@@ -99,9 +99,6 @@ function Login({ onLogin, onSignUp }) {
           </button>
         </div>
 
-        <div className="demo-hint" style={{ textAlign: 'center' }}>
-          Demo: <code>driver@test.com</code> / <code>password123</code>
-        </div>
       </div>
     </div>
   );

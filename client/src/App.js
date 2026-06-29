@@ -54,6 +54,27 @@ function App() {
       ) : (
         <AdminDashboard onLogout={handleLogout} />
       )}
+
+      {/* Footer */}
+      <div style={{
+        maxWidth: '1200px',
+        margin: '20px auto',
+        padding: '20px 24px',
+        textAlign: 'center',
+        borderTop: '1px solid var(--border-subtle)',
+        color: 'var(--text-muted)',
+        fontSize: '14px'
+      }}>
+        <p>
+          Built by <strong style={{ color: 'var(--text-secondary)' }}>Akram Hees</strong> &nbsp;|&nbsp;
+          <a href="mailto:akramh2454@gmail.com" style={{ color: '#8a5c66', textDecoration: 'none' }}>
+            akramh2454@gmail.com
+          </a> &nbsp;|&nbsp;
+          <a href="https://github.com/akramhees" target="_blank" rel="noopener noreferrer" style={{ color: '#8a5c66', textDecoration: 'none' }}>
+            GitHub: @akramhees
+          </a>
+        </p>
+      </div>
     </div>
   );
 }
