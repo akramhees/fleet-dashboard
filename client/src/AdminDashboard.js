@@ -1,91 +1,129 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import './colors.css';
+import './App.css';
 
 function AdminDashboard({ onLogout }) {
-  const [drivers] = useState([
-    { id: 1, name: 'John Driver', status: '🟢 Driving', location: 'Downtown' },
-    { id: 2, name: 'Jane Smith', status: '🔴 Offline', location: 'Home' },
-    { id: 3, name: 'Bob Johnson', status: '🟢 Driving', location: 'Airport' },
-  ]);
+  const [campaigns, setCampaigns] = useState([]);
+  const [newCampaign, setNewCampaign] = useState({ name: '', status: 'Active', budget: '' });
+  const [loading, setLoading] = useState(false);
 
-  const [campaigns] = useState([
-    { id: 1, name: 'Summer Sale', status: 'Active', budget: '$500' },
-    { id: 2, name: 'Holiday Promo', status: 'Paused', budget: '$300' },
-    { id: 3, name: 'New Driver Bonus', status: 'Active', budget: '$1000' },
-  ]);
+  const fetchCampaigns = async () => {
+    try {
+      const res = await fetch('http://localhost:5001/api/campaigns');
+      const data = await res.json();
+      if (data.success) setCampaigns(data.campaigns);
+    } catch (error) {
+      console.error('Error fetching campaigns:', error);
+    }
+  };
+
+  const createCampaign = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const res = await fetch('http://localhost:5001/api/campaigns', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newCampaign)
+      });
+      const data = await res.json();
+      if (data.success) {
+        setNewCampaign({ name: '', status: 'Active', budget: '' });
+        fetchCampaigns();
+      }
+    } catch (error) {
+      console.error('Error creating campaign:', error);
+    }
+    setLoading(false);
+  };
+
+  const deleteCampaign = async (id) => {
+    if (!window.confirm('Delete this campaign?')) return;
+    try {
+      await fetch(`http://localhost:5001/api/campaigns/${id}`, { method: 'DELETE' });
+      fetchCampaigns();
+    } catch (error) {
+      console.error('Error deleting campaign:', error);
+    }
+  };
+
+  useEffect(() => { fetchCampaigns(); }, []);
+
+  const drivers = [
+    { id: 1, name: 'John Driver', status: 'Driving', location: 'Downtown' },
+    { id: 2, name: 'Jane Smith', status: 'Offline', location: 'Home' },
+    { id: 3, name: 'Bob Johnson', status: 'Driving', location: 'Airport' },
+  ];
 
   return (
-    <div style={{ maxWidth: '900px', margin: '30px auto', padding: '20px' }}>
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center',
-        borderBottom: '1px solid #eee',
-        paddingBottom: '20px'
-      }}>
-        <h2>📊 Admin Dashboard</h2>
-        <button 
-          onClick={onLogout}
-          style={{
-            padding: '8px 16px',
-            backgroundColor: '#dc3545',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }}
-        >
+    <div className="dashboard-container">
+      <div className="header-modern">
+        <h1>FleetPulse <span>Admin</span></h1>
+        <button onClick={onLogout} className="btn-danger" style={{ padding: '8px 20px', fontSize: '14px' }}>
           Logout
         </button>
       </div>
 
-      <div style={{ marginTop: '30px' }}>
-        <h3>🚗 Active Drivers</h3>
-        <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px' }}>
-          <thead>
-            <tr style={{ backgroundColor: '#f8f9fa' }}>
-              <th style={{ padding: '10px', textAlign: 'left' }}>Name</th>
-              <th style={{ padding: '10px', textAlign: 'left' }}>Status</th>
-              <th style={{ padding: '10px', textAlign: 'left' }}>Location</th>
-            </tr>
-          </thead>
+      <div className="card" style={{ marginBottom: '24px' }}>
+        <h3 style={{ marginBottom: '16px', color: '#d4d2e0' }}>Active Drivers</h3>
+        <table className="table-modern">
+          <thead><tr><th>Name</th><th>Status</th><th>Location</th></tr></thead>
           <tbody>
-            {drivers.map(driver => (
-              <tr key={driver.id} style={{ borderBottom: '1px solid #eee' }}>
-                <td style={{ padding: '10px' }}>{driver.name}</td>
-                <td style={{ padding: '10px' }}>{driver.status}</td>
-                <td style={{ padding: '10px' }}>{driver.location}</td>
+            {drivers.map(d => (
+              <tr key={d.id}>
+                <td>{d.name}</td>
+                <td><span className={d.status === 'Driving' ? 'badge badge-driving' : 'badge badge-offline'}>{d.status}</span></td>
+                <td>{d.location}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
 
-      <div style={{ marginTop: '40px' }}>
-        <h3>📢 Marketing Campaigns</h3>
-        <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px' }}>
-          <thead>
-            <tr style={{ backgroundColor: '#f8f9fa' }}>
-              <th style={{ padding: '10px', textAlign: 'left' }}>Campaign</th>
-              <th style={{ padding: '10px', textAlign: 'left' }}>Status</th>
-              <th style={{ padding: '10px', textAlign: 'left' }}>Budget</th>
-            </tr>
-          </thead>
+      <div className="card">
+        <h3 style={{ marginBottom: '16px', color: '#d4d2e0' }}>Marketing Campaigns</h3>
+        
+        <form onSubmit={createCampaign} className="form-row">
+          <input
+            type="text" placeholder="Campaign Name"
+            className="input-modern"
+            value={newCampaign.name}
+            onChange={(e) => setNewCampaign({...newCampaign, name: e.target.value})}
+            required
+          />
+          <select
+            className="input-modern select"
+            value={newCampaign.status}
+            onChange={(e) => setNewCampaign({...newCampaign, status: e.target.value})}
+          >
+            <option value="Active">Active</option>
+            <option value="Paused">Paused</option>
+          </select>
+          <input
+            type="text" placeholder="Budget (e.g. $1000)"
+            className="input-modern"
+            value={newCampaign.budget}
+            onChange={(e) => setNewCampaign({...newCampaign, budget: e.target.value})}
+            required
+          />
+          <button type="submit" className="btn-primary" disabled={loading}>
+            {loading ? 'Creating...' : 'Add Campaign'}
+          </button>
+        </form>
+
+        <table className="table-modern">
+          <thead><tr><th>Campaign</th><th>Status</th><th>Budget</th><th>Actions</th></tr></thead>
           <tbody>
-            {campaigns.map(campaign => (
-              <tr key={campaign.id} style={{ borderBottom: '1px solid #eee' }}>
-                <td style={{ padding: '10px' }}>{campaign.name}</td>
-                <td style={{ padding: '10px' }}>
-                  <span style={{
-                    padding: '4px 8px',
-                    backgroundColor: campaign.status === 'Active' ? '#d4edda' : '#f8d7da',
-                    color: campaign.status === 'Active' ? '#155724' : '#721c24',
-                    borderRadius: '4px',
-                    fontSize: '12px'
-                  }}>
-                    {campaign.status}
-                  </span>
+            {campaigns.map(c => (
+              <tr key={c.id}>
+                <td><strong style={{ color: '#e8e7ed' }}>{c.name}</strong></td>
+                <td><span className={c.status === 'Active' ? 'badge badge-active' : 'badge badge-paused'}>{c.status}</span></td>
+                <td>{c.budget}</td>
+                <td>
+                  <button onClick={() => deleteCampaign(c.id)} className="btn-danger" style={{ padding: '4px 16px', fontSize: '13px' }}>
+                    Delete
+                  </button>
                 </td>
-                <td style={{ padding: '10px' }}>{campaign.budget}</td>
               </tr>
             ))}
           </tbody>

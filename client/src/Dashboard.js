@@ -1,21 +1,106 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
+import localforage from 'localforage';
+import './colors.css';
+import './App.css';
 
 const mapContainerStyle = {
   width: '100%',
-  height: '400px'
+  height: '400px',
+  borderRadius: '12px'
 };
 
-const center = {
-  lat: 39.7392,
-  lng: -104.9903
+const mapOptions = {
+  styles: [
+    {
+      featureType: 'all',
+      elementType: 'all',
+      stylers: [
+        { saturation: -100 },
+        { lightness: -20 },
+        { gamma: 0.5 }
+      ]
+    },
+    {
+      featureType: 'road',
+      elementType: 'geometry',
+      stylers: [{ color: '#3a3a4a' }]
+    },
+    {
+      featureType: 'water',
+      elementType: 'geometry',
+      stylers: [{ color: '#1a1a2e' }]
+    },
+    {
+      featureType: 'landscape',
+      elementType: 'geometry',
+      stylers: [{ color: '#28293e' }]
+    }
+  ]
 };
+
+const center = { lat: 39.7392, lng: -104.9903 };
 
 function Dashboard({ user, onLogout }) {
   const [isDriving, setIsDriving] = useState(false);
   const [location, setLocation] = useState(null);
   const [status, setStatus] = useState('Not started');
   const [mapCenter, setMapCenter] = useState(center);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [offlineLocations, setOfflineLocations] = useState([]);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isOnline && offlineLocations.length > 0) {
+      syncOfflineLocations();
+    }
+  }, [isOnline]);
+
+  const syncOfflineLocations = async () => {
+    try {
+      const saved = await localforage.getItem('offlineLocations');
+      if (saved && saved.length > 0) {
+        for (const loc of saved) {
+          await fetch('http://localhost:5001/api/location', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(loc)
+          });
+        }
+        await localforage.removeItem('offlineLocations');
+        setOfflineLocations([]);
+        setStatus('Synced offline locations');
+      }
+    } catch (error) {
+      console.error('Sync error:', error);
+    }
+  };
+
+  const saveLocation = async (locationData) => {
+    if (navigator.onLine) {
+      try {
+        await fetch('http://localhost:5001/api/location', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(locationData)
+        });
+        return true;
+      } catch (error) {
+        return false;
+      }
+    }
+    return false;
+  };
 
   const startTracking = () => {
     if (navigator.geolocation) {
@@ -27,124 +112,94 @@ function Dashboard({ user, onLogout }) {
           };
           setLocation(newLocation);
           setMapCenter(newLocation);
-          setStatus('✅ Driving - Location tracking active');
+
+          const locationData = {
+            driver_id: user.id,
+            lat: newLocation.lat,
+            lng: newLocation.lng
+          };
+
+          const saved = await saveLocation(locationData);
           
-          try {
-            await fetch('http://localhost:5001/api/location', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                driver_id: user.id,
-                lat: newLocation.lat,
-                lng: newLocation.lng
-              })
-            });
-          } catch (error) {
-            console.error('Error saving location:', error);
+          if (!saved) {
+            const existing = await localforage.getItem('offlineLocations') || [];
+            existing.push(locationData);
+            await localforage.setItem('offlineLocations', existing);
+            setOfflineLocations(existing);
+            setStatus('Offline - Location saved locally');
+          } else {
+            setStatus('Driving - Location tracking active');
           }
         },
-        (error) => {
-          setStatus('❌ Error getting location: ' + error.message);
-        }
+        (error) => setStatus('Error: ' + error.message)
       );
       setIsDriving(true);
     } else {
-      setStatus('❌ Geolocation not supported');
+      setStatus('Geolocation not supported');
     }
   };
 
   const stopTracking = () => {
     setIsDriving(false);
-    setStatus('⏹️ Shift ended');
+    setStatus('Shift ended');
     setLocation(null);
   };
 
   return (
-    <div style={{ maxWidth: '800px', margin: '50px auto', padding: '20px' }}>
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center',
-        borderBottom: '1px solid #eee',
-        paddingBottom: '20px'
-      }}>
-        <div>
-          <h2>🚗 Driver Dashboard</h2>
-          <p>Welcome, {user?.name || 'Driver'}!</p>
+    <div className="dashboard-container">
+      <div className="header-modern">
+        <h1>FleetPulse <span>Driver</span></h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          <span style={{ fontSize: '14px', opacity: 0.8 }}>{user?.name}</span>
+          <span style={{
+            fontSize: '12px',
+            padding: '4px 12px',
+            borderRadius: '20px',
+            background: isOnline ? 'rgba(40, 167, 69, 0.2)' : 'rgba(220, 53, 69, 0.2)',
+            color: isOnline ? '#5cb85c' : '#dc3545'
+          }}>
+            {isOnline ? 'Online' : 'Offline'}
+          </span>
+          <button onClick={onLogout} className="btn-danger" style={{ padding: '8px 20px', fontSize: '14px' }}>
+            Logout
+          </button>
         </div>
-        <button 
-          onClick={onLogout}
-          style={{
-            padding: '8px 16px',
-            backgroundColor: '#dc3545',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }}
-        >
-          Logout
-        </button>
       </div>
 
-      <div style={{ marginTop: '30px' }}>
-        <div style={{ 
-          padding: '20px',
-          backgroundColor: '#f8f9fa',
-          borderRadius: '8px',
-          marginBottom: '20px'
-        }}>
-          <h3>Status</h3>
-          <p style={{ fontSize: '18px', fontWeight: 'bold' }}>{status}</p>
-          {location && (
-            <p style={{ fontSize: '14px', color: '#666' }}>
-              📍 Location: {location.lat.toFixed(6)}, {location.lng.toFixed(6)}
-            </p>
-          )}
+      <div className="card" style={{ marginBottom: '24px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' }}>
+          <div>
+            <h2 style={{ marginBottom: '4px' }}>Driver Dashboard</h2>
+            <p style={{ color: '#9a8ea6' }}>Status: <strong style={{ color: '#e8e7ed' }}>{status}</strong></p>
+            {offlineLocations.length > 0 && (
+              <p style={{ color: '#f0ad4e', fontSize: '13px' }}>
+                {offlineLocations.length} locations waiting to sync
+              </p>
+            )}
+            {location && (
+              <p style={{ fontSize: '13px', color: '#6a5e74', marginTop: '4px' }}>
+                Location: {location.lat.toFixed(6)}, {location.lng.toFixed(6)}
+              </p>
+            )}
+          </div>
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            <button onClick={startTracking} disabled={isDriving} className="btn-primary">
+              Start Shift
+            </button>
+            <button onClick={stopTracking} disabled={!isDriving} className="btn-danger">
+              End Shift
+            </button>
+          </div>
         </div>
+      </div>
 
-        <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
-          <button 
-            onClick={startTracking}
-            disabled={isDriving}
-            style={{
-              flex: 1,
-              padding: '15px',
-              backgroundColor: isDriving ? '#ccc' : '#28a745',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              fontSize: '18px',
-              cursor: isDriving ? 'not-allowed' : 'pointer'
-            }}
-          >
-            🟢 Start Shift
-          </button>
-
-          <button 
-            onClick={stopTracking}
-            disabled={!isDriving}
-            style={{
-              flex: 1,
-              padding: '15px',
-              backgroundColor: !isDriving ? '#ccc' : '#dc3545',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              fontSize: '18px',
-              cursor: !isDriving ? 'not-allowed' : 'pointer'
-            }}
-          >
-            🔴 End Shift
-          </button>
-        </div>
-
-        {/* Google Map */}
+      <div className="card" style={{ padding: '8px', minHeight: '420px' }}>
         <LoadScript googleMapsApiKey="AIzaSyBb9N7JtOi-CyjCsD3Z82oYf6_PPYWKri0">
           <GoogleMap
             mapContainerStyle={mapContainerStyle}
             center={mapCenter}
             zoom={14}
+            options={mapOptions}
           >
             {location && <Marker position={location} />}
           </GoogleMap>

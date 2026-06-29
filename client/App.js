@@ -29,14 +29,14 @@ function App() {
           className={role === 'driver' ? 'btn-primary' : 'btn-secondary'}
           style={{ padding: '10px 24px', fontSize: '14px' }}
         >
-          Driver View
+          🚗 Driver View
         </button>
         <button
           onClick={() => setRole('admin')}
           className={role === 'admin' ? 'btn-primary' : 'btn-secondary'}
           style={{ padding: '10px 24px', fontSize: '14px' }}
         >
-          Admin View
+          📊 Admin View
         </button>
       </div>
 
