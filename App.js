@@ -69,7 +69,7 @@ function App() {
           <a href="mailto:akramh2454@gmail.com" style={{ color: '#8a5c66', textDecoration: 'none' }}>
             akramh2454@gmail.com
           </a> &nbsp;|&nbsp;
-          <a href="https://github.com/akramhees" target="_blank" rel="noopener noreferrer" style={{ color: '#8a5c66', textDecoration: 'none' }}>
+          <a href="https:
             GitHub: @akramhees
           </a>
         </p>

@@ -19,7 +19,7 @@ function DocumentUpload({ onUpload, label = 'Upload Document' }) {
     if (!file) return;
     setUploading(true);
     
-    // Simulate upload - replace with actual API call
+    
     setTimeout(() => {
       setUploaded(true);
       setUploading(false);

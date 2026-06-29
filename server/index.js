@@ -15,10 +15,10 @@ const io = socketIo(server, {
 
 const PORT = process.env.PORT || 5001;
 
-console.log('🔥 SERVER STARTING...');
+console.log(' SERVER STARTING...');
 
 const pool = new Pool({
-  connectionString: "postgresql://fleetpulse_db_zbds_user:P9gLHcN3JGAAbxpGJdBvjLJEZ9QSDSkq@dpg-d91322og4nts73c57etg-a.oregon-postgres.render.com/fleetpulse_db_zbds",
+  connectionString: "postgresql:
   ssl: {
     rejectUnauthorized: false
   }
@@ -28,13 +28,13 @@ app.use(cors());
 app.use(express.json());
 
 io.on('connection', (socket) => {
-  console.log('🔌 New client connected:', socket.id);
+  console.log(' New client connected:', socket.id);
   socket.on('driver-location', (data) => {
-    console.log('📍 Location update:', data);
+    console.log(' Location update:', data);
     io.emit('location-update', data);
   });
   socket.on('disconnect', () => {
-    console.log('🔌 Client disconnected:', socket.id);
+    console.log(' Client disconnected:', socket.id);
   });
 });
 
@@ -95,7 +95,7 @@ app.get('/api/test', (req, res) => {
 
 app.post('/api/signup', async (req, res) => {
   const { name, email, phone, password, licenseNumber, vehicleModel, vehiclePlate } = req.body;
-  console.log('📝 Sign up attempt:', email);
+  console.log(' Sign up attempt:', email);
   
   try {
     const existing = await pool.query('SELECT * FROM drivers WHERE email = $1', [email]);
@@ -236,5 +236,5 @@ app.delete('/api/campaigns/:id', async (req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log('✅ Server running on http://localhost:' + PORT);
+  console.log('✅ Server running on http:
 });

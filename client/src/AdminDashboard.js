@@ -12,7 +12,7 @@ function AdminDashboard({ onLogout }) {
 
   const fetchCampaigns = async () => {
     try {
-      const res = await fetch('http://localhost:5001/api/campaigns');
+      const res = await fetch('http:
       const data = await res.json();
       if (data.success) setCampaigns(data.campaigns);
     } catch (error) {
@@ -24,7 +24,7 @@ function AdminDashboard({ onLogout }) {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:5001/api/campaigns', {
+      const res = await fetch('http:
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newCampaign)

@@ -50,7 +50,7 @@ function Dashboard({ user, onLogout }) {
       const saved = await localforage.getItem('offlineLocations');
       if (saved && saved.length > 0) {
         for (const loc of saved) {
-          await fetch('http://localhost:5001/api/location', {
+          await fetch('http:
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(loc)
@@ -68,7 +68,7 @@ function Dashboard({ user, onLogout }) {
   const saveLocation = async (locationData) => {
     if (navigator.onLine) {
       try {
-        await fetch('http://localhost:5001/api/location', {
+        await fetch('http:
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(locationData)
